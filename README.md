@@ -25,4 +25,13 @@ Build Environment:
 This project was built using Visual Studio 2019 Community edition with CUDA toolkit 10.2. The GPU device must have
 Compute Capability 3.5 compatibility due the use of dynamic parallelism.  If this criteria is met, simply open the
 project and build.  A compiled executable is included.
-  
+
+How to Use:
+Make sure the executable, DTED file (.DT0) and inputs.txt are in the same directory.  You can set aircraft parameters 
+in the input.txt file. Then run the executable. Be aware that if your hardware is not compatible, it could result in
+system or device crash including your display driver crashing.  I recommend disabling the visibility calculation initially
+by setting 'Compute_Visibility' to 0.  The program will wait after each execution alolowing you to change the input
+values in the file and run the calculation again.
+
+
+

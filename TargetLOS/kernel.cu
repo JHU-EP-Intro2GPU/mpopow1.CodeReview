@@ -294,27 +294,39 @@ Description
 	This host function is a wrapper for launching the computeSlantRange() kernel.  It loads the known aircraft data to the device, calls the kernel
 	and retrieves the result from the device. By default, it launches computeSlantRange() with 1 block of 512 threads. 
 Parameters
-	adata        - pointer to an Aircraft Data structure containing input data
-	rdata        - pointer to a Slant Range Data structure which is used to contain intermediate data in the calculation
-	caller_index - the index of the parent thread (with respect to its grid) which launched this kernel. Debug purposes only
+	AV_Data        - pointer to an Aircraft Data structure containing input data
 Output
 	This function prints out the target location to the screen including latitude, longitude, altitude (terrain elevation) and range from the aircraft.
 */
-extern "C" void CalcTargetLocation(Aircraft_Data* AV_Data, DTEDFile* DTED_Data)
+extern "C" void CalcTargetLocation(Aircraft_Data* AV_Data)
 {
+	//Initialize CUDA event timing
+	cudaEvent_t start, end;
+	cudaEventCreate(&start);
+	cudaEventCreate(&end);
+	float duration = 0;
+
+	//Load aircraft data
 	Aircraft_Data* d_AV_Data;
 	cudaMalloc((void **)&d_AV_Data, sizeof(Aircraft_Data));
 	cudaMemcpy(d_AV_Data, AV_Data, sizeof(Aircraft_Data), cudaMemcpyHostToDevice);
-
+	
 	printf("\n\nRunning Slant Range Kernel\n");
+	cudaEventRecord(start); //Start timing
+	
+	//Launch Kernel
 	computeSlantRange <<< NUM_BLOCKS, NUM_THREADS >>> (d_AV_Data, d_rangeData ,0);
 	cudaDeviceSynchronize();
-	printf("\nKernel Finished\n\n");
+	
+	//End Timing
+	cudaEventRecord(end);
+	cudaEventSynchronize(end);
+	cudaEventElapsedTime(&duration, start, end);
+	printf("Kernel Finished. Execution Time: %fms\n", duration);
 
 	cudaMemcpy(AV_Data, d_AV_Data, sizeof(Aircraft_Data), cudaMemcpyDeviceToHost);
-	printf("TARGET LOCATION: Latitude: %f | Longitude: %f | Altitude: %fm | Range: %dm\n", AV_Data->T_latitude * RAD_TO_DEG, AV_Data->T_longitude * RAD_TO_DEG, AV_Data->T_altitude, (int)(AV_Data->slantRange));
+	printf("TARGET LOCATION: Latitude: %.2f | Longitude: %.2f | Altitude: %.2fm | Range: %dm\n", AV_Data->T_latitude * RAD_TO_DEG, AV_Data->T_longitude * RAD_TO_DEG, AV_Data->T_altitude, (int)(AV_Data->slantRange));
 	cudaFree(d_AV_Data);
-	
 }
 
 //===================================================================================================================================================
@@ -511,6 +523,12 @@ Output
 */
 extern "C" void CalcAreaVisibility(Aircraft_Data* AV_Data, DTEDFile* DTED_Data)
 {
+	//Initialize CUDA event timing
+	cudaEvent_t start, end;
+	cudaEventCreate(&start);
+	cudaEventCreate(&end);
+	float duration = 0;
+
 	int num_blocks = DTED_Data->lat_count / VISIBILITY_SCAN_NUM_THREADS;      //Number of blocks needed for computation
 	if (DTED_Data->lat_count % VISIBILITY_SCAN_NUM_THREADS > 0) num_blocks++; //in case the number of threads needed is not evenly divisble by the number of blocks
 
@@ -524,11 +542,20 @@ extern "C" void CalcAreaVisibility(Aircraft_Data* AV_Data, DTEDFile* DTED_Data)
 	cudaMalloc((void**)& d_DTED_Data, sizeof(DTEDFile));
 	cudaMemcpy(d_DTED_Data, DTED_Data, sizeof(DTEDFile), cudaMemcpyHostToDevice);
 
-	//printf("\n\nLocation Lat: %f | Lon: %f | Alt: %f\n",AV_Data->A_latitude * RAD_TO_DEG, AV_Data->A_longitude * RAD_TO_DEG, AV_Data->A_altitude);
 	printf("\n\nRunning Visibility Scan Kernel\n");
-	computeVisibility <<< num_blocks, VISIBILITY_SCAN_NUM_THREADS >>> (d_AV_Data, d_DTED_Data);
-	printf("\nKernel Finished. Check file visibility_output.txt\n");
+	cudaEventRecord(start); //Start timing
 
+	//Launch Kernel
+	computeVisibility <<< num_blocks, VISIBILITY_SCAN_NUM_THREADS >>> (d_AV_Data, d_DTED_Data);
+	cudaDeviceSynchronize();
+
+	//End Timing
+	cudaEventRecord(end);
+	cudaEventSynchronize(end);
+	cudaEventElapsedTime(&duration, start, end);
+	printf("Kernel Finished. Execution Time: %fms\nCheck file visibility_output.txt\n", duration);
+
+	//Write results to file
 	printVisibleArea(DTED_Data);
 
 	cudaFree(d_AV_Data);

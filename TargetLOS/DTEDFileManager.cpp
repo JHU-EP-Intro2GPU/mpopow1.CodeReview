@@ -137,5 +137,6 @@ void DTEDFileManager::PrintFileData(int num_elevations)
 		cout << data.elevations[i] << " ";
 	}
 	cout << endl;
+	cout << "\n=====================";
 }
 

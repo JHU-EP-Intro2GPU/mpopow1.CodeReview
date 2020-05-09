@@ -99,7 +99,7 @@ typedef struct {
 
 extern "C" void calculateABC(Aircraft_Data* Data);
 extern "C" void printMatrix(float* matrix, int height, int width);
-extern "C" void CalcTargetLocation(Aircraft_Data* AV_Data, DTEDFile* DTED_Data);
+extern "C" void CalcTargetLocation(Aircraft_Data* AV_Data);
 extern "C" void LoadElevationData(DTEDFile* DTED_Data);
 extern "C" void CalcAreaVisibility(Aircraft_Data* AV_Data, DTEDFile* DTED_Data);
 

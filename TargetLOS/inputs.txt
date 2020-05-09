@@ -1,0 +1,29 @@
+Aircraft Data Input File
+Instructions:
+	- Set the parameters below to the desired floating point value
+	- Execute the program and observe the results
+
+Rules:
+North and east are positive. South and west are negative
+Yaw is clockwise relative to true north
+Pitch up is positive, down is negative
+Roll clockwise is positive, counterclockwise is negative
+azimuth is clockwise relative to aircraft forward
+elevation below the aircraft horizontal plane is negative
+
+Yaw_Angle(degrees)=0.0
+Pitch_Angle(degrees)=0.0
+Roll_Angle(degrees)=0.0
+LOS_Azimuth_Angle(degrees)=279.81
+LOS_Depression_Angle(degrees)=-19.73
+Latitude_Degrees=36
+Latitude_Minutes=8
+Latitude_Seconds=44.0
+Longitude_Degrees=-112
+Longitude_Minutes=15
+Longitude_Seconds=46.0
+Altitude(feet)=4000.0
+
+Select the type of computation, one enables and zero disables the option:
+Compute_Target_Location=1
+Compute_Visibility=1
